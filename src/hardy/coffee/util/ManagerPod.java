@@ -12,10 +12,12 @@ public interface ManagerPod {
 	
 	public JSONObject querySQL(String responseName,String sql,Object[] params);
 	
+	public JSONObject querySQL(String responseName,String sql,Object params);
+	
 	public List<Map<String,Object>> listQuery(String sql);
 	
 	public List<Map<String,Object>> listQuery(String sql,Object[] params);
-	
+		
 	public void executeSQL(String sql);
 	
 	public void executeSQL(String sql,Object[] params);
@@ -28,5 +30,5 @@ public interface ManagerPod {
 
 	List<Map<String, Object>> listQuery(String sql, Object param);
 	
-	String testConnection();
+
 }

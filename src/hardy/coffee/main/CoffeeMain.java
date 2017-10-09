@@ -11,6 +11,8 @@ public class CoffeeMain {
 		// TODO Auto-generated method stub
 		
 		ConnectionManager db = new ConnectionManager("/Users/eunanhardy/Desktop/dbConfig.ccm");
+		
+		System.out.println(db.querySQL("Test", "SELECT * FROM test.users"));
 
 	}
 
