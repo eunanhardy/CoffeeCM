@@ -10,9 +10,12 @@ public class CoffeeMain {
 	public static void main(String[] args) throws IOException, SQLException {
 		// TODO Auto-generated method stub
 		
-		ConnectionManager db = new ConnectionManager("/Users/eunanhardy/Desktop/dbConfig.ccm");
+		//ConnectionManager db = new ConnectionManager("/Users/eunanhardy/Desktop/dbConfig.ccm");
 		
-		System.out.println(db.querySQL("Test", "SELECT * FROM test.users"));
+//		Object[] params = {"ehardy@asd.com","password","Emma","Robb",1};
+//		db.executeSQL("INSERT INTO project.accounts(email,password,forename,surname,accounttype) VALUES(?,?,?,?,?)",params);
+		
+//		System.out.println(db.querySQL("Test", "SELECT * FROM project.accounts"));
 
 	}
 

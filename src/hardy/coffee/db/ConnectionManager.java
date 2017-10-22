@@ -1,7 +1,5 @@
 package hardy.coffee.db;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,13 +12,12 @@ import java.util.Properties;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import hardy.coffee.util.*;
 
 public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	
-	private Connection connection = null;
+	private ConnectionConfig comConfig = null;
 	
 	/**
 	 * Defines connection information for thise instance of the ConnectionManager class
@@ -32,13 +29,8 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	 *
 	 */
 	public ConnectionManager(String username,String password,String url,String driver) throws SQLException{
-		BasicDataSource bs = new BasicDataSource();
-		bs.setUsername(username);
-		bs.setPassword(password);
-		bs.setUrl(url);
-		bs.setDriverClassName(driver);
+		comConfig = new ConnectionConfig(username,password,url,driver);
 		
-		connection = bs.getConnection();
 		System.out.println("Database Connection Established");
 	}
 	/***
@@ -56,24 +48,17 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	 */
 	public ConnectionManager(String filePath) throws IOException, SQLException{
 		FileInputStream file = new FileInputStream(filePath);
-		BasicDataSource bs = new BasicDataSource();
+		
 		Properties prop = new Properties();
 		
 		prop.load(file);
-		String user = prop.getProperty("username");
-		String pass = prop.getProperty("password");
-		String url = prop.getProperty("url");
-		String driver = prop.getProperty("driver");
+		comConfig = new ConnectionConfig();
+		comConfig.setUsername(prop.getProperty("username"));
+		comConfig.setPassword( prop.getProperty("password"));;
+		comConfig.setUrl(prop.getProperty("url"));
+		comConfig.setDriver(prop.getProperty("driver"));
 		
 		
-		
-		bs.setUsername(user);
-		bs.setPassword(pass);
-		bs.setUrl(url);
-		bs.setDriverClassName(driver);
-		
-		connection = bs.getConnection();
-		System.out.println("Database Connection Established");
 		
 	}
 	
@@ -91,8 +76,10 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		PreparedStatement psStatement = null;
 		ResultSet result = null;
 		
+		
 		try{
-			psStatement = connection.prepareStatement(sql);
+			Connection connect = getConnection(comConfig);
+			psStatement = connect.prepareStatement(sql);
 			result = psStatement.executeQuery();
 			jsonResponse.put(responseName, returnJSON(result));
 			
@@ -100,7 +87,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 			sql_exception.printStackTrace();
 		}finally{
 			closeResultSet(result);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 			
 		}
 		
@@ -121,11 +108,12 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	public JSONObject querySQL(String responseName, String sql, Object[] params) {
 		// TODO Auto-generated method stub
 		JSONObject json = new JSONObject();
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet result = null;
 		
 		try{
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql);
 			
 			for(int index = 0;index < params.length;index++)
@@ -142,7 +130,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 			
 		}finally{
 			closeResultSet(result);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 			closeConnection(connect);
 		}
 		
@@ -163,12 +151,12 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	@Override
 	public JSONObject querySQL(String responseName, String sql, Object params) {
 		JSONObject json = new JSONObject();
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet result = null;
 	
 	try{
-		
+		connect = getConnection(comConfig);
 		
 		psStatement = connect.prepareStatement(sql);
 		
@@ -185,7 +173,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		
 	}finally{
 		closeResultSet(result);
-		closePrepStatment(psStatement);
+		closePrepStatement(psStatement);
 		closeConnection(connect);
 	}
 	
@@ -202,14 +190,14 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	
 	@Override
 	public List<Map<String, Object>> listQuery(String sql) {
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet result = null;
 		List<Map<String,Object>> list = null;
 		
 		
 		try{
-			
+			connect = getConnection(comConfig);
 			
 			psStatement = connect.prepareStatement(sql);
 			result = psStatement.executeQuery();
@@ -220,7 +208,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 			e.printStackTrace();
 		}finally{
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 			closeResultSet(result);
 		}
 		
@@ -236,14 +224,14 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	 */
 	@Override
 	public List<Map<String, Object>> listQuery(String sql, Object[] params) {
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet result = null;
 		List<Map<String,Object>> list = null;
 		
 		
 		try{
-			
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql);
 			
 			for(int index =0;index < params.length;index++)
@@ -260,21 +248,26 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally{
 			
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 			closeResultSet(result);
 		}
 		
 		return list;
 	}
+	
+	/***
+	 * Execute SQL without returning a result. used for UPDATE,DELETE and INSERT actions
+	 * @param sql - SQL statement
+	 */
 
 	@Override
 	public void executeSQL(String sql) {
 		// TODO Auto-generated method stub
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		
 		try{
-
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql);
 			psStatement.executeUpdate();
 			
@@ -284,18 +277,27 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally
 		{
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 		}
 		
 	}
-
+	
+	/***
+	 * Execute SQL without a result, can pass in SQL parameters via a Object array
+	 * 
+	 * @param sql - SQL statement
+	 * @param params - an array of generic Objects
+	 * 
+	 */
+	
 	@Override
 	public void executeSQL(String sql, Object[] params) {
 		// TODO Auto-generated method stub
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		
 		try{
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql);
 			
 			for(int index = 0;index < params.length;index++)
@@ -311,18 +313,24 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally
 		{
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 		}
 		
 	}
+	
+	/***
+	 * 
+	 * 
+	 * 
+	 */
 
 	@Override
 	public void executeSQL(String sql, Object param) {
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		
 		try{
-
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql);
 			
 			
@@ -337,7 +345,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally
 		{
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 		}
 		
 	}
@@ -345,12 +353,12 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	@Override
 	public int executeSQLReturnID(String sql, Object[] params) {
 		
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet rsRow = null;
 		int generatedID = 0;
 		try{
-
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 			
 			for(int index = 0;index < params.length;index++)
@@ -372,7 +380,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally
 		{
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 		}
 		
 		return generatedID;
@@ -381,12 +389,12 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	@Override
 	public int executeSQLReturnID(String sql, Object param) {
 		// TODO Auto-generated method stub
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet rsRow = null;
 		int generatedID = 0;
 		try{
-
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 			
 
@@ -408,7 +416,7 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally
 		{
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 		}
 		
 		return generatedID;
@@ -417,13 +425,14 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 	@Override
 	public List<Map<String, Object>> listQuery(String sql, Object param) {
 		// TODO Auto-generated method stub
-		Connection connect = connection;
+		Connection connect = null;
 		PreparedStatement psStatement = null;
 		ResultSet result = null;
 		List<Map<String,Object>> list = null;
 		
 		
 		try{			
+			connect = getConnection(comConfig);
 			psStatement = connect.prepareStatement(sql);
 			psStatement.setObject(1, param);
 
@@ -436,13 +445,15 @@ public class ConnectionManager extends ProcessingPod implements ManagerPod  {
 		}finally{
 			
 			closeConnection(connect);
-			closePrepStatment(psStatement);
+			closePrepStatement(psStatement);
 			closeResultSet(result);
 		}
 		
 		return list;
 	}
 
+	
+	
 
 
 	

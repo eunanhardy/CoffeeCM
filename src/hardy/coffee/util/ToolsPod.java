@@ -26,7 +26,7 @@ public class ToolsPod {
 		}
 	}
 	
-	public void closePrepStatment(PreparedStatement prep){
+	public void closePrepStatement(PreparedStatement prep){
 		try {
 			prep.close();
 		} catch (SQLException e) {

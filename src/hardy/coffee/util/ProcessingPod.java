@@ -1,5 +1,6 @@
 package hardy.coffee.util;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbcp.BasicDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import hardy.coffee.util.ToolsPod;
@@ -86,6 +88,17 @@ public class ProcessingPod extends ToolsPod {
 		}
 		
 		return list;
+	}
+	
+	
+	public Connection getConnection(ConnectionConfig config) throws SQLException{
+			BasicDataSource bs = new BasicDataSource();
+			bs.setUsername(config.username);
+			bs.setPassword(config.password);
+			bs.setUrl(config.url);
+			bs.setDriverClassName(config.driver);
+			
+			return bs.getConnection();
 	}
 
 }
