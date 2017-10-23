@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-public interface ManagerPod {
+public interface CoffeeInterface {
 	
 	
 	public JSONObject querySQL(String responseName,String sql);

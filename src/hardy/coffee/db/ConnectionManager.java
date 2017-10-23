@@ -10,12 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.dbcp.BasicDataSource;
 import org.json.JSONObject;
 
 import hardy.coffee.util.*;
 
-public class ConnectionManager extends ProcessingPod implements ManagerPod  {
+public class ConnectionManager extends CoffeeUtils implements CoffeeInterface  {
 	
 	private ConnectionConfig comConfig = null;
 	

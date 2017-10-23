@@ -1,6 +1,7 @@
 package hardy.coffee.util;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -12,9 +13,9 @@ import java.util.Map;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import hardy.coffee.util.ToolsPod;
 
-public class ProcessingPod extends ToolsPod {
+
+public class CoffeeUtils {
 	
 	protected JSONArray returnJSON(ResultSet rs)
 	{
@@ -99,6 +100,33 @@ public class ProcessingPod extends ToolsPod {
 			bs.setDriverClassName(config.driver);
 			
 			return bs.getConnection();
+	}
+	
+	public void closeConnection(Connection comm){
+		try {
+			comm.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void closeResultSet(ResultSet rs){
+		try {
+			rs.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void closePrepStatement(PreparedStatement prep){
+		try {
+			prep.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
