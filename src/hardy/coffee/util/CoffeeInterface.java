@@ -30,5 +30,9 @@ public interface CoffeeInterface {
 
 	List<Map<String, Object>> listQuery(String sql, Object param);
 	
+	public void executeStoredProcedure(String sql,Object params);
+	
+	public void executeStoredProcedure(String sql,Object[] params);
+	
 
 }

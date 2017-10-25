@@ -12,6 +12,8 @@ import java.util.Properties;
 
 import org.json.JSONObject;
 
+import com.mysql.jdbc.CallableStatement;
+
 import hardy.coffee.util.*;
 
 public class ConnectionManager extends CoffeeUtils implements CoffeeInterface  {
@@ -450,6 +452,58 @@ public class ConnectionManager extends CoffeeUtils implements CoffeeInterface  {
 		
 		return list;
 	}
+	@Override
+	public void executeStoredProcedure(String sql, Object params) {
+		// TODO Auto-generated method stub
+		Connection connect = null;
+		java.sql.CallableStatement callStatement = null;
+		
+		try {
+			connect = getConnection(comConfig);
+			callStatement = connect.prepareCall(sql);
+			callStatement.setObject(1, params);
+			
+			callStatement.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			closeCall(callStatement);
+			closeConnection(connect);
+		}
+		
+		
+	}
+	@Override
+	public void executeStoredProcedure(String sql, Object[] params) {
+		// TODO Auto-generated method stub
+		Connection connect = null;
+		java.sql.CallableStatement callStatement = null;
+		
+		try {
+			connect = getConnection(comConfig);
+			callStatement = connect.prepareCall(sql);
+			
+			for(int index = 0;index < params.length;index++)
+			{
+				callStatement.setObject(index+1, params[index]);
+			}
+			
+			callStatement.executeUpdate();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			closeCall(callStatement);
+			closeConnection(connect);
+		}
+		
+		
+		
+	}
+	
+	
 
 	
 	

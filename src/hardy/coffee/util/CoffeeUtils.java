@@ -14,6 +14,8 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.mysql.jdbc.CallableStatement;
+
 
 public class CoffeeUtils {
 	
@@ -103,11 +105,13 @@ public class CoffeeUtils {
 	}
 	
 	public void closeConnection(Connection comm){
+		if(comm != null){
 		try {
 			comm.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
 		}
 	}
 	
@@ -126,6 +130,18 @@ public class CoffeeUtils {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public void closeCall(java.sql.CallableStatement callStatement){
+		if(callStatement != null){
+		try {
+			callStatement.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		}
 	}
 
